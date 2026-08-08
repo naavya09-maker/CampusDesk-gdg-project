@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  role      Role     @default(STUDENT)
+  createdAt DateTime @default(now())
+
+  bookings  Booking[]
+}
+
+model Resource {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  location    String
+  category    String
+  openTime    String
+  closeTime   String
+  isActive    Boolean   @default(true)
+
+  bookings    Booking[]
+}
+
+model Booking {
+  id            Int            @id @default(autoincrement())
+  startTime     DateTime
+  endTime       DateTime
+  purpose       String
+  status        BookingStatus  @default(CONFIRMED)
+  createdAt     DateTime       @default(now())
+  reminderSent  Boolean        @default(false)
+
+  userId        Int
+  resourceId    Int
+
+  user          User           @relation(fields: [userId], references: [id])
+  resource      Resource       @relation(fields: [resourceId], references: [id])
+}
+
+model Otp {
+  id         Int      @id @default(autoincrement())
+  email      String
+  otp        String
+  expiresAt  DateTime
+  used       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+}

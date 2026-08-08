@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Environment secrets
+server/.env
+
+# Build output
+client/dist/
+
+# Local database
+server/prisma/prisma/dev.db
+
+# Editor/system files
+.vscode/
+.idea/
+.DS_Store
