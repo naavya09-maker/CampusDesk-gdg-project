@@ -1,101 +1,90 @@
 # CampusDesk
 
-Full-stack LNMIIT campus resource booking application.
+> A full-stack campus resource booking system for LNMIIT.
 
-## Stack
+CampusDesk allows students to discover campus resources, view availability, book time slots, and manage their bookings. Administrators can manage resources and monitor bookings.
 
-- Frontend: React + Vite + Axios
-- Backend: Node.js + Express
-- Database: SQLite + Prisma
-- Authentication: Email OTP + JWT
-- Scheduled jobs: node-cron
-- Optional email delivery: Nodemailer SMTP
+The core challenge of the project is preventing overlapping bookings for the same resource while enforcing booking and authorization rules on the backend.
 
-## Run locally
+---
 
-### 1. Server
+## 📌 Submission
 
-```bash
-cd server
-npm install
-```
+| Deliverable | Link |
+|---|---|
+| GitHub Repository | [CampusDesk-gdg-project](https://github.com/naavya09-maker/CampusDesk-gdg-project) |
+| Demo Video | **TODO — add link before submission** |
+| Live Deployment | **TODO — add link if deployed** |
+| Design Document | [DESIGN.md](./DESIGN.md) |
 
-Create `server/.env` from `.env.example`:
+---
 
-```env
-DATABASE_URL="file:./dev.db"
-JWT_SECRET="replace-with-a-long-random-secret"
-PORT=3000
-CLIENT_URL="http://localhost:5173"
-```
+## ✨ Features
 
-Optional SMTP variables can be added for real email delivery. If SMTP is not configured, OTPs and reminder messages are printed to the server console; this is explicitly allowed for development by the task.
+### Authentication
+- Passwordless email + OTP authentication
+- 6-digit OTP
+- OTP expiry and single-use validation
+- OTP request rate limiting
+- JWT authentication
+- 24-hour authenticated sessions
+- Student and Admin roles
+- Protected API routes
+- Automatic logout on `401 Unauthorized`
 
-Then:
+### Resource Management
+- Browse campus resources
+- Search resources
+- Filter by category
+- Server-side pagination
+- Admin resource creation
+- Admin resource updates
+- Admin soft deletion
 
-```bash
-npx prisma migrate dev
-npx prisma generate
-npm run seed
-npm run dev
-```
+### Booking
+- Create bookings for campus resources
+- View resource availability
+- Prevent overlapping confirmed bookings
+- Allow back-to-back bookings
+- Validate booking duration
+- Validate resource operating hours
+- Require future start times
+- Maximum of two upcoming confirmed bookings per resource per student
+- Cancel eligible bookings
+- Admin booking management
 
-### 2. Client
+### Automated Jobs
+- Reminder processing approximately one hour before confirmed bookings
+- Prevent duplicate reminders using `reminderSent`
+- Automatically mark past confirmed bookings as completed
 
-In another terminal:
+---
 
-```bash
-cd client
-npm install
-npm run dev
-```
+## 🏗️ Architecture
 
-Open `http://localhost:5173`.
+```text
+┌─────────────────────┐
+│    React Frontend   │
+│      Vite + Axios   │
+└──────────┬──────────┘
+           │
+           │ REST API / JSON
+           ▼
+┌─────────────────────┐
+│   Express Backend   │
+│ Authentication      │
+│ Authorization       │
+│ Validation          │
+│ Booking Logic       │
+└──────────┬──────────┘
+           │
+           │ Prisma
+           ▼
+┌─────────────────────┐
+│    SQLite Database  │
+└─────────────────────┘
 
-## Demo accounts
-
-All users use OTP login; there are no passwords.
-
-- Admin: `admin@lnmiit.ac.in`
-- Student: `naavya@lnmiit.ac.in`
-- Student: `rahul@lnmiit.ac.in`
-
-For development, the OTP appears in the server terminal.
-
-## Main API
-
-Authentication:
-- `POST /api/auth/send-otp`
-- `POST /api/auth/verify-otp`
-
-Resources:
-- `GET /api/resources?search=&category=&page=&limit=`
-- `GET /api/resources/:id`
-- `POST /api/resources` (admin)
-- `PATCH /api/resources/:id` (admin)
-- `DELETE /api/resources/:id` (admin, soft delete)
-
-Bookings:
-- `POST /api/bookings`
-- `GET /api/bookings/me?status=&page=&limit=`
-- `GET /api/bookings/resource/:id?date=YYYY-MM-DD`
-- `PATCH /api/bookings/:id/cancel`
-- `GET /api/admin/bookings?resourceId=&status=&date=&page=&limit=` (admin)
-
-## Booking rules
-
-- Confirmed bookings cannot overlap.
-- Back-to-back bookings are allowed.
-- Start must be in the future.
-- End must be after start.
-- Duration must be 30 minutes to 4 hours.
-- Slot must be inside the resource's opening hours.
-- Students can hold at most two upcoming confirmed bookings for one resource.
-- Cancellation is owner-only for students and can happen only before the booking starts. Admins can cancel any booking.
-
-## Scheduled job
-
-Every minute the server:
-- sends a reminder about one hour before a confirmed booking starts;
-- marks past confirmed bookings as `COMPLETED`;
-- persists `reminderSent` so a reminder is not sent twice.
+        ┌──────────────┐
+        │ node-cron     │
+        │ Scheduled Job │
+        └──────────────┘
