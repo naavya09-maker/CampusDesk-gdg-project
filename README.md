@@ -10,6 +10,7 @@ CampusDesk is a full-stack campus resource booking application designed for mana
 | Live Frontend | [CampusDesk](https://campusdesk-4tgu.onrender.com) |
 | Live Backend API | [CampusDesk API](https://campusdesk-api-ih0s.onrender.com) |
 | Demo Video | Add video link here |
+| Design Document | [DESIGN.md](DESIGN.md) |
 
 ## Features
 
