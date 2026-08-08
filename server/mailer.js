@@ -1,48 +1,42 @@
-const nodemailer = require("nodemailer");
+const sendEmail = async ({ to, subject, text }) => {
+  const scriptUrl = process.env.GOOGLE_SCRIPT_URL;
+  const secret = process.env.GOOGLE_SCRIPT_SECRET;
 
-let transporterPromise = null;
-
-const getTransporter = async () => {
-  if (transporterPromise) return transporterPromise;
-
-  if (
-    process.env.SMTP_HOST &&
-    process.env.SMTP_USER &&
-    process.env.SMTP_PASS
-  ) {
-    transporterPromise = Promise.resolve(
-      nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: Number(process.env.SMTP_PORT || 587),
-        secure: String(process.env.SMTP_SECURE || "false") === "true",
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      })
-    );
-  } else {
-    transporterPromise = Promise.resolve(null);
+  if (!scriptUrl || !secret) {
+    console.error("Google email service environment variables are missing");
+    throw new Error("Email service is not configured");
   }
 
-  return transporterPromise;
+  const response = await fetch(scriptUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      secret,
+      to,
+      otp: extractOtp(text),
+    }),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok || !result.success) {
+    console.error("Google email service error:", result);
+    throw new Error(result.message || "Failed to send email");
+  }
+
+  return result;
 };
 
-const sendEmail = async ({ to, subject, text, html }) => {
-  const transporter = await getTransporter();
+const extractOtp = (text) => {
+  const match = String(text || "").match(/\b\d{6}\b/);
 
-  if (!transporter) {
-    console.log(`\n[CampusDesk email fallback] To: ${to}\nSubject: ${subject}\n${text}\n`);
-    return { fallback: true };
+  if (!match) {
+    throw new Error("OTP could not be extracted from email content");
   }
 
-  return transporter.sendMail({
-    from: process.env.MAIL_FROM || process.env.SMTP_USER,
-    to,
-    subject,
-    text,
-    html,
-  });
+  return match[0];
 };
 
 module.exports = { sendEmail };

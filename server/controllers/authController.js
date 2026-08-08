@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 const normalizeEmail = (email) => String(email || "").trim().toLowerCase();
 
 const validEmail = (email) =>
-  /^[^\s@]+@lnmiit\.ac\.in$/.test(email);
+  /^[^\s@]+@lnmiit\.ac\.in$/i.test(email);
 
 const sendOtp = async (req, res) => {
   try {
