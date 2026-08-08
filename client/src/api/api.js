@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:3000/api",
+  baseURL: "https://campusdesk-api-ih0s.onrender.com/api",
   timeout: 10000,
 });
 
