@@ -1,13 +1,14 @@
 const { PrismaClient } = require("@prisma/client");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const { sendEmail } = require("../mailer");
 
 const prisma = new PrismaClient();
 
 const normalizeEmail = (email) => String(email || "").trim().toLowerCase();
 
 const validEmail = (email) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  /^[^\s@]+@lnmiit\.ac\.in$/.test(email);
 
 const sendOtp = async (req, res) => {
   try {
@@ -25,11 +26,13 @@ const sendOtp = async (req, res) => {
     }
 
     if (!validEmail(email)) {
-      return res.status(400).json({
-        message: "Please enter a valid email address",
-        errors: { email: "Invalid email address" },
-      });
-    }
+  return res.status(400).json({
+    message: "Only LNMIIT college email addresses are allowed",
+    errors: {
+      email: "Please use your @lnmiit.ac.in email address",
+    },
+  });
+}
 
     // At most 3 OTP requests in the last 10 minutes.
     const since = new Date(Date.now() - 10 * 60 * 1000);
@@ -59,14 +62,24 @@ const sendOtp = async (req, res) => {
       data: { email, otp, expiresAt },
     });
 
-    // Development mode is explicitly allowed by the task.
-    // Configure SMTP in .env to send real emails.
-    console.log(`\n[CampusDesk OTP] ${email}: ${otp} (valid for 5 minutes)\n`);
+    await sendEmail({
+  to: email,
+  subject: "CampusDesk Login OTP",
+  text: `Your CampusDesk verification code is ${otp}. It is valid for 5 minutes.`,
+  html: `
+    <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto;">
+      <h2>CampusDesk</h2>
+      <p>Your verification code is:</p>
+      <h1 style="letter-spacing: 6px;">${otp}</h1>
+      <p>This code is valid for 5 minutes.</p>
+      <p>If you did not request this code, you can ignore this email.</p>
+    </div>
+  `,
+});
 
-    return res.json({
-      message: "OTP sent successfully",
-      developmentMode: true,
-    });
+return res.json({
+  message: "OTP sent successfully",
+});
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Something went wrong" });
