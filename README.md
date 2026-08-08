@@ -1,90 +1,102 @@
 # CampusDesk
 
-> A full-stack campus resource booking system for LNMIIT.
+CampusDesk is a full-stack campus resource booking application designed for managing shared college resources such as rooms, labs, sports facilities, and equipment.
 
-CampusDesk allows students to discover campus resources, view availability, book time slots, and manage their bookings. Administrators can manage resources and monitor bookings.
-
-The core challenge of the project is preventing overlapping bookings for the same resource while enforcing booking and authorization rules on the backend.
-
----
-
-## 📌 Submission
+## Submission
 
 | Deliverable | Link |
 |---|---|
-| GitHub Repository | [CampusDesk-gdg-project](https://github.com/naavya09-maker/CampusDesk-gdg-project) |
-| Demo Video | **TODO — add link before submission** |
-| Live Deployment | **TODO — add link if deployed** |
-| Design Document | [DESIGN.md](./DESIGN.md) |
+| GitHub Repository | https://github.com/naavya09-maker/CampusDesk-gdg-project |
+| Live Deployment | https://campusdesk-4tgu.onrender.com |
+| Demo Video | Add video link here |
 
----
-
-## ✨ Features
+## Features
 
 ### Authentication
-- Passwordless email + OTP authentication
-- 6-digit OTP
-- OTP expiry and single-use validation
-- OTP request rate limiting
-- JWT authentication
-- 24-hour authenticated sessions
-- Student and Admin roles
-- Protected API routes
-- Automatic logout on `401 Unauthorized`
+- Email-based OTP authentication
+- JWT-based session authentication
+- Role-based access control for students and administrators
+- LNMIIT email-based user identification
 
 ### Resource Management
-- Browse campus resources
-- Search resources
-- Filter by category
-- Server-side pagination
-- Admin resource creation
-- Admin resource updates
-- Admin soft deletion
+- Browse available campus resources
+- Search resources by name
+- Filter resources by category
+- View resource details and availability
+- Admin resource creation, editing, and soft deletion
 
-### Booking
-- Create bookings for campus resources
-- View resource availability
-- Prevent overlapping confirmed bookings
+### Booking System
+- Create bookings for available resources
+- Prevent overlapping bookings
 - Allow back-to-back bookings
-- Validate booking duration
-- Validate resource operating hours
-- Require future start times
-- Maximum of two upcoming confirmed bookings per resource per student
-- Cancel eligible bookings
-- Admin booking management
+- Enforce booking duration limits
+- Enforce resource opening hours
+- Limit students to two upcoming confirmed bookings per resource
+- Cancel bookings according to ownership and timing rules
+- Admins can manage and cancel bookings
 
-### Automated Jobs
-- Reminder processing approximately one hour before confirmed bookings
-- Prevent duplicate reminders using `reminderSent`
-- Automatically mark past confirmed bookings as completed
+### Booking Status
+Bookings can have the following states:
 
----
+- CONFIRMED
+- CANCELLED
+- COMPLETED
 
-## 🏗️ Architecture
+Past confirmed bookings are automatically marked as completed.
+
+### Scheduled Tasks
+A `node-cron` job runs periodically to:
+
+- Send booking reminders approximately one hour before the booking
+- Mark past confirmed bookings as completed
+- Prevent duplicate reminders using the `reminderSent` field
+
+## Technology Stack
+
+### Frontend
+- React
+- Vite
+- Axios
+- CSS
+
+### Backend
+- Node.js
+- Express.js
+- JWT
+- Nodemailer
+- node-cron
+
+### Database
+- SQLite
+- Prisma ORM
+
+## Project Structure
 
 ```text
-┌─────────────────────┐
-│    React Frontend   │
-│      Vite + Axios   │
-└──────────┬──────────┘
-           │
-           │ REST API / JSON
-           ▼
-┌─────────────────────┐
-│   Express Backend   │
-│ Authentication      │
-│ Authorization       │
-│ Validation          │
-│ Booking Logic       │
-└──────────┬──────────┘
-           │
-           │ Prisma
-           ▼
-┌─────────────────────┐
-│    SQLite Database  │
-└─────────────────────┘
-
-        ┌──────────────┐
-        │ node-cron     │
-        │ Scheduled Job │
-        └──────────────┘
+CampusDesk/
+├── client/
+│   ├── src/
+│   │   ├── api/
+│   │   ├── assets/
+│   │   ├── App.jsx
+│   │   ├── App.css
+│   │   └── main.jsx
+│   └── package.json
+│
+├── server/
+│   ├── controllers/
+│   ├── middleware/
+│   ├── routes/
+│   ├── prisma/
+│   │   ├── migrations/
+│   │   ├── schema.prisma
+│   │   └── seed.js
+│   ├── cron.js
+│   ├── mailer.js
+│   ├── index.js
+│   └── package.json
+│
+├── postman/
+├── DESIGN.md
+├── QUICK_START.md
+└── README.md
