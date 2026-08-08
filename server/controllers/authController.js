@@ -34,7 +34,7 @@ const sendOtp = async (req, res) => {
   });
 }
 
-    // At most 3 OTP requests in the last 10 minutes.
+    /*// At most 3 OTP requests in the last 10 minutes.
     const since = new Date(Date.now() - 10 * 60 * 1000);
     const recentRequests = await prisma.otp.count({
       where: {
@@ -47,7 +47,7 @@ const sendOtp = async (req, res) => {
       return res.status(429).json({
         message: "Too many OTP requests. Please wait before trying again.",
       });
-    }
+    }*/
 
     const otp = crypto.randomInt(100000, 1000000).toString();
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
